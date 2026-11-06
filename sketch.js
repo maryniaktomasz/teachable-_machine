@@ -2,7 +2,7 @@
 // for this feature to work
 
 // put the model URL from https://teachablemachine.withgoogle.com/train/pose here
-let poseModelURL = "https://teachablemachine.withgoogle.com/models/a-c04xzVV/";
+let poseModelURL = "https://teachablemachine.withgoogle.com/models/GMdTRytBp/";
 
 let video;
 let tmPoseModel;
@@ -27,6 +27,7 @@ function draw() {
 
   if (prediction.length > 0) {
     fill(255, 0, 0);
+    textSize(24);
     text(prediction[0].className + ' (' + prediction[0].probability + ')', 20, 20);
   }
 }
