@@ -5,6 +5,7 @@ let classifier;
 const modelURL = 'https://teachablemachine.withgoogle.com/models/45QO4nj80/';
 let captureAspectRatio;
 let current_image, img_working1, img_working2, img_hand_out;
+let current_text;
 let label = "background";
 let battle_quest_active = false;
 const tools = ["pigeon", "rabbit", "blue_pot", "book"];
@@ -14,6 +15,12 @@ const give_me_names = {
   "blue_pot": "roślinkę",
   "book": "książkę"
 }
+const have_names = {
+  "pigeon": "gołąb",
+  "rabbit": "królik",
+  "blue_pot": "roślinka",
+  "book": "książka"
+}
 let quest_item
 
 function preload() {
@@ -21,6 +28,7 @@ function preload() {
 }
 
 function setup() {
+  frameRate(30)
   createCanvas(1200, 600);
   video = createCapture(VIDEO);
   video.hide();
@@ -33,15 +41,17 @@ function setup() {
   current_image = img_working1;
   setInterval(imageChanger, 1000);
 
-  setTimeout(battle_quest, random(3000, 7000)
-  )
+  setTimeout(battle_quest, random(3000, 7000))
+  
 }
 function classifyVideo() {
   classifier.classify(video, gotResults);
 }
 function draw() {
+  noCursor();
   background(0);
   image(current_image, 0, 0);
+  text(current_text, 10, height / 4);
   push();
   translate(width, 0);
   scale(-1, 1);
@@ -49,7 +59,7 @@ function draw() {
   pop();
 
   
-  const confidenceThreshold = 0.9;
+  const confidenceThreshold = 0.90;
   if (guess.label == "pigeon" && guess.confidence > confidenceThreshold) {
     label = "pigeon";
   } else if (guess.label == "rabbit" && guess.confidence > confidenceThreshold) {
@@ -58,14 +68,28 @@ function draw() {
     label = "blue_pot";
   } else if (guess.label == "book" && guess.confidence > confidenceThreshold) {
     label = "book";
-  } else if (guess.label == "background" && guess.confidence > confidenceThreshold) {
+  } else if (guess.label == "background" && guess.confidence > confidenceThreshold*0.8) {
     label = "background";
   }
+  console.log(guess.label, guess.confidence, label)
 
   if (battle_quest_active){
     textSize(30);
-    text(label, width / 5, height / 4);
-    text("podaj mnie no " + give_me_names[quest_item])
+    current_text = "Podaj mnie no " + give_me_names[quest_item] + ".";
+    console.log("aktualny label: " + label)
+    if (label == quest_item) {
+      current_text = "Dziękuję!";
+      battle_quest_active = false;
+      current_image = img_working1;
+      setTimeout(clear_text, 2000);
+      setTimeout(battle_quest, random(3000, 7000));
+    } else if (label != "background") {
+      current_text = "Na kij mi " + have_names[label] + "!?";
+      battle_quest_active = false;
+      current_image = img_working1;
+      setTimeout(clear_text, 2000);
+      setTimeout(battle_quest, random(3000, 7000));
+    }
   }
   
 }
@@ -75,7 +99,7 @@ function gotResults(error, results) {
     return;
   }
   guess = results[0];
-  classifyVideo();
+  setTimeout(classifyVideo, 300);
 }
 
 function imageChanger() {
@@ -94,4 +118,8 @@ function battle_quest() {
   quest_item = random(tools)
   console.log(quest_item)
   
+}
+
+function clear_text() {
+  current_text = "";
 }
