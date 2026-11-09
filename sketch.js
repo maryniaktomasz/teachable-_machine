@@ -16,18 +16,21 @@ let current_text;
 let label = "background";
 let battle_quest_active = false;
 const tools = [pigeon, rabbit, blue_pot, book];
+const responses = [...tools, nothing];
 const give_me_names = {
   pigeon: "gołębia",
   rabbit: "królika",
   blue_pot: "roślinkę",
   book: "książkę"
-}
+};
+
 const have_names = {
   pigeon: "gołąb",
   rabbit: "królik",
   blue_pot: "roślinka",
   book: "książka"
-}
+};
+
 let quest_item;
 
 function preload() {
@@ -51,9 +54,11 @@ function setup() {
   setTimeout(battle_quest, random(3000, 7000))
 
 }
+
 function classifyVideo() {
   classifier.classify(video, gotResults);
 }
+
 function draw() {
   noCursor();
   background(0);
@@ -67,26 +72,10 @@ function draw() {
 
 
   const confidenceThreshold = 0.90;
-  if (guess.confidence > confidenceThreshold) {
-    if (guess.label == pigeon) {
-      label = pigeon;
-      // console.log("pigeon detected")
-    } else if (guess.label == rabbit) {
-      label = rabbit;
-      // console.log("rabbit detected")
-    } else if (guess.label == blue_pot) {
-      label = blue_pot;
-      // console.log("blue_pot detected")
-    } else if (guess.label == book) {
-      label = book;
-      // console.log("book detected")
-    } else if (guess.label == nothing) {
-      label = nothing;
-      // console.log("background detected")
-    }
-  }
 
-  console.log(guess.label, guess.confidence, label)
+  if (guess.confidence > confidenceThreshold && responses.includes(guess.label)) {
+    label = guess.label;
+  }
 
   if (battle_quest_active) {
     textSize(30);
@@ -105,14 +94,15 @@ function draw() {
       setTimeout(battle_quest, random(3000, 7000));
     }
   }
-
 }
+
 function gotResults(error, results) {
   if (error) {
     console.error(error);
     return;
   }
   guess = results[0];
+
   setTimeout(classifyVideo, 300);
 }
 
@@ -130,7 +120,6 @@ function battle_quest() {
   battle_quest_active = true;
   current_image = img_hand_out;
   quest_item = random(tools)
-  console.log(quest_item)
 
 }
 
