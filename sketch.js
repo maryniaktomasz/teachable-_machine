@@ -7,7 +7,14 @@ let captureAspectRatio;
 let current_image, img_working1, img_working2, img_hand_out;
 let label = "background";
 let battle_quest_active = false;
-
+const tools = ["pigeon", "rabbit", "blue_pot", "book"];
+const give_me_names = {
+  "pigeon": "gołębia",
+  "rabbit": "królika",
+  "blue_pot": "roślinkę",
+  "book": "książkę"
+}
+let quest_item
 
 function preload() {
   classifier = ml5.imageClassifier(modelURL + 'model.json');
@@ -55,8 +62,12 @@ function draw() {
     label = "background";
   }
 
-  // textSize(256);
-  // text(label, width / 2, height / 2);
+  if (battle_quest_active){
+    textSize(30);
+    text(label, width / 5, height / 4);
+    text("podaj mnie no " + give_me_names[quest_item])
+  }
+  
 }
 function gotResults(error, results) {
   if (error) {
@@ -80,4 +91,7 @@ function imageChanger() {
 function battle_quest() {
   battle_quest_active = true;
   current_image = img_hand_out;
+  quest_item = random(tools)
+  console.log(quest_item)
+  
 }
