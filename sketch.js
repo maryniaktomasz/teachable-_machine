@@ -1,51 +1,71 @@
-// Note: when training in Teachable Machine, you need to disable "Flip Camera"
-// for this feature to work
-
-// put the model URL from https://teachablemachine.withgoogle.com/train/pose here
-let poseModelURL = "https://teachablemachine.withgoogle.com/models/GMdTRytBp/";
-
 let video;
-let tmPoseModel;
-let prediction = [];
+let guess = "waiting...";
+let classifier;
+const modelURL = 'https://teachablemachine.withgoogle.com/models/45QO4nj80/';
+let captureAspectRatio;
+let current_image = img_working1;
 
-async function setup() {
-  createCanvas(640, 480);
-
-  video = createCapture(VIDEO, { flipped: true });
-  video.size(width, height);
+function preload() {
+  classifier = ml5.imageClassifier(modelURL + 'model.json');
+}
+function setup() {
+  createCanvas(1200, 600);
+  video = createCapture(VIDEO);
   video.hide();
+  classifyVideo();
+  captureAspectRatio = video.height / video.width;
+  img_working1 =loadImage("images/working1.png")
+  img_working2 =loadImage("images/working2.png")
 
-  // this loads the custom model from Teachable Machine and schedules the
-  // first prediction to be in 33ms
-  tmPoseModel = await tmPose.load(poseModelURL + "model.json", poseModelURL + "metadata.json");
-  console.log("Model loaded");
-  setTimeout(predictTmPose, 33);
+  setInterval(imageChanger, 3000);
 }
-
+function classifyVideo() {
+  classifier.classify(video, gotResults);
+}
 function draw() {
-  image(video, 0, 0, width, height);
-
-  if (prediction.length > 0) {
-    fill(255, 0, 0);
-    textSize(24);
-    text(prediction[0].className + ' (' + prediction[0].probability + ')', 20, 20);
+  background(0);
+  // image(img_working1, 0, 0);
+  push();
+  translate(width, 0);
+  scale(-1, 1);
+  image(video, 0, 0, 300, 300 * captureAspectRatio);
+  pop();
+  
+  textSize(32);
+  textAlign(CENTER, CENTER);
+  fill(255);
+  text(guess, width / 2, height - 16);
+  const confidenceThreshold = 0.9;
+  let label = "";
+  if (guess.label == "pigeon" & guess.confidence > confidenceThreshold) {
+  label = "pigeon";
+  } else if (guess.label == "rabbit" & guess.confidence > confidenceThreshold) {
+  label = "rabbit";
+  } else if (guess.label == "blue_pot" & guess.confidence > confidenceThreshold) {
+  label = "blue_pot";
+  } else if (guess.label == "book" & guess.confidence > confidenceThreshold) {
+  label = "book";
   }
+  
+  // textSize(256);
+  // text(label, width / 2, height / 2);
+}
+function gotResults(error, results) {
+  if (error) {
+  console.error(error);
+  return;
+  }
+  guess = results[0];
+  classifyVideo();
 }
 
-
-
-// please ignore the details of this piece of code
-// it runs the custom model, and updates the prediction
-// variable with the result (we use the variable in draw)
-async function predictTmPose() {
-  try {
-    let { pose, posenetOutput } = await tmPoseModel.estimatePose(video.elt);
-    prediction = await tmPoseModel.predict(posenetOutput);
-    // sort result by probability
-    prediction = prediction.sort((a,b) => (a.probability < b.probability) ? 1 : ((b.probability < a.probability) ? -1 : 0))
-  } catch (e) {
-    console.warn(e);
+function imageChanger() {
+  if (current_image == img_working1) {
+    current_image = img_working2;
+  } else {
+    current_image = img_working1;
   }
-  //console.log(prediction);
-  setTimeout(predictTmPose, 33);
-}
+
+  background(0);
+  image(current_image, 0, 0, 300, 150);
+ }
