@@ -1,4 +1,11 @@
 "use strict";
+
+const nothing = "backgroud";
+const pigeon = "pigeon";
+const rabbit = "rabbit";
+const blue_pot = "blue_pot";
+const book = "book";
+
 let video;
 let guess = "waiting...";
 let classifier;
@@ -8,20 +15,20 @@ let current_image, img_working1, img_working2, img_hand_out;
 let current_text;
 let label = "background";
 let battle_quest_active = false;
-const tools = ["pigeon", "rabbit", "blue_pot", "book"];
+const tools = [pigeon, rabbit, blue_pot, book];
 const give_me_names = {
-  "pigeon": "gołębia",
-  "rabbit": "królika",
-  "blue_pot": "roślinkę",
-  "book": "książkę"
+  pigeon: "gołębia",
+  rabbit: "królika",
+  blue_pot: "roślinkę",
+  book: "książkę"
 }
 const have_names = {
-  "pigeon": "gołąb",
-  "rabbit": "królik",
-  "blue_pot": "roślinka",
-  "book": "książka"
+  pigeon: "gołąb",
+  rabbit: "królik",
+  blue_pot: "roślinka",
+  book: "książka"
 }
-let quest_item
+let quest_item;
 
 function preload() {
   classifier = ml5.imageClassifier(modelURL + 'model.json');
@@ -42,7 +49,7 @@ function setup() {
   setInterval(imageChanger, 1000);
 
   setTimeout(battle_quest, random(3000, 7000))
-  
+
 }
 function classifyVideo() {
   classifier.classify(video, gotResults);
@@ -58,32 +65,39 @@ function draw() {
   image(video, 0, 0, 300, 300 * captureAspectRatio);
   pop();
 
-  
+
   const confidenceThreshold = 0.90;
-  if (guess.label == "pigeon" && guess.confidence > confidenceThreshold) {
-    label = "pigeon";
-  } else if (guess.label == "rabbit" && guess.confidence > confidenceThreshold) {
-    label = "rabbit";
-  } else if (guess.label == "blue_pot" && guess.confidence > confidenceThreshold) {
-    label = "blue_pot";
-  } else if (guess.label == "book" && guess.confidence > confidenceThreshold) {
-    label = "book";
-  } else if (guess.label == "background" && guess.confidence > confidenceThreshold*0.8) {
-    label = "background";
+  if (guess.confidence > confidenceThreshold) {
+    if (guess.label == pigeon) {
+      label = pigeon;
+      // console.log("pigeon detected")
+    } else if (guess.label == rabbit) {
+      label = rabbit;
+      // console.log("rabbit detected")
+    } else if (guess.label == blue_pot) {
+      label = blue_pot;
+      // console.log("blue_pot detected")
+    } else if (guess.label == book) {
+      label = book;
+      // console.log("book detected")
+    } else if (guess.label == nothing) {
+      label = nothing;
+      // console.log("background detected")
+    }
   }
+
   console.log(guess.label, guess.confidence, label)
 
-  if (battle_quest_active){
+  if (battle_quest_active) {
     textSize(30);
     current_text = "Podaj mnie no " + give_me_names[quest_item] + ".";
-    console.log("aktualny label: " + label)
     if (label == quest_item) {
       current_text = "Dziękuję!";
       battle_quest_active = false;
       current_image = img_working1;
       setTimeout(clear_text, 2000);
       setTimeout(battle_quest, random(3000, 7000));
-    } else if (label != "background") {
+    } else if (label != nothing) {
       current_text = "Na kij mi " + have_names[label] + "!?";
       battle_quest_active = false;
       current_image = img_working1;
@@ -91,7 +105,7 @@ function draw() {
       setTimeout(battle_quest, random(3000, 7000));
     }
   }
-  
+
 }
 function gotResults(error, results) {
   if (error) {
@@ -117,7 +131,7 @@ function battle_quest() {
   current_image = img_hand_out;
   quest_item = random(tools)
   console.log(quest_item)
-  
+
 }
 
 function clear_text() {
