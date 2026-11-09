@@ -125,6 +125,7 @@ function draw() {
 
 function gotResults(error, results) {
   // handling errors and updating the guess with the classification results
+   if (error) {
     console.error(error);
     return;
   }
